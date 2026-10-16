@@ -188,6 +188,9 @@ impl Scene {
     }
 
     pub fn select_all_visible(&mut self) -> usize {
+        use std::time::Instant;
+        let t_start = Instant::now();
+
         let block = self.interaction_block_handle();
         let frozen: Option<HashSet<Handle>> = self
             .interaction_viewport_frozen_layers()
@@ -201,6 +204,8 @@ impl Scene {
             .find(|record| record.handle == block)
             .map(|record| record.entity_handles.clone())
             .unwrap_or_default();
+
+        let t_collect = Instant::now();
         let selected = handles
             .into_iter()
             .filter(|handle| self.passes_selection_filter(*handle))
@@ -217,7 +222,25 @@ impl Scene {
                 })
             })
             .collect();
+        let t_filter = t_collect.elapsed().as_secs_f64() * 1000.0;
+
+        let t_replace = Instant::now();
         self.replace_selection(selected);
+        let t_replace_ms = t_replace.elapsed().as_secs_f64() * 1000.0;
+
+        let t_total = t_start.elapsed().as_secs_f64() * 1000.0;
+
+        // Log to file
+        use std::io::Write;
+        if let Ok(mut file) = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open("/tmp/select_all_timing.log")
+        {
+            let _ = writeln!(file, "select_all_visible: filter={:.1}ms, replace={:.1}ms, TOTAL={:.1}ms",
+                t_filter, t_replace_ms, t_total);
+        }
+
         self.selected.len()
     }
 
