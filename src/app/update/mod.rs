@@ -1325,10 +1325,17 @@ impl OpenCADStudio {
                     .file_name()
                     .map(|n| n.to_string_lossy().into_owned())
                     .unwrap_or_else(|| "unknown".into());
+
+                // Full open pipeline (DWG/DXF): parse + caches + geometry +
+                // camera fit via open_path_with_phase → FileOpened →
+                // on_file_opened. Phase2's bare document assign is not enough
+                // to display a drawing.
                 let progress = std::sync::Arc::new(crate::io::OpenProgressState::new(
                     super::OPEN_PHASE_READING,
                 ));
                 let open_id = self.next_open_id();
+                #[cfg(not(target_arch = "wasm32"))]
+                let fingerprint = crate::io::edit_lock::FileFingerprint::capture(&path).ok();
                 self.opening = Some(super::OpenProgress {
                     id: open_id,
                     name: name.clone(),
@@ -1341,7 +1348,7 @@ impl OpenCADStudio {
                     #[cfg(target_arch = "wasm32")]
                     recovery_bytes: None,
                     #[cfg(not(target_arch = "wasm32"))]
-                    fingerprint: crate::io::edit_lock::FileFingerprint::capture(&path).ok(),
+                    fingerprint,
                 });
                 let size_label = format_size(size_bytes);
                 self.command_line
@@ -1356,6 +1363,17 @@ impl OpenCADStudio {
             }
 
             Message::OpenCancel => {
+                // Phase 2: Cancel background loading if active
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    if self.phase2.is_loading() {
+                        self.phase2.cancel();
+                        self.command_line
+                            .push_info(crate::tf!("File loading cancelled.").as_ref());
+                        return Task::none();
+                    }
+                }
+
                 #[cfg(target_arch = "wasm32")]
                 let cancelled_id = self.opening.as_ref().map(|opening| opening.id);
                 if let Some(p) = self.opening.take() {

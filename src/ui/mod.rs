@@ -6,6 +6,7 @@ pub mod color_select;
 pub mod command_line;
 pub mod dock;
 pub mod icons;
+pub mod loading_progress;
 pub mod menu_bar;
 pub mod modal;
 pub mod node_graph;

@@ -4,6 +4,8 @@
 // Default save format: DWG (AC1032 / R2018+).
 
 #[cfg(not(target_arch = "wasm32"))]
+pub mod background_loader;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod edit_lock;
 // Same split as web_session/web_autosave: the save-routing decision (and
 // its tests) is pure and compiles everywhere; the showSaveFilePicker half

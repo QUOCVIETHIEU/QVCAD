@@ -1,0 +1,75 @@
+=== File Sizes by Module ===
+  600699 total
+   15550 src/scene/mod.rs
+   14599 src/app/plugin_host.rs
+   12786 src/app/update/mod.rs
+    9537 src/entities/dimension.rs
+    9026 src/app/update/file.rs
+    8670 src/app/update/viewport.rs
+    6279 src/scene/pipeline/mod.rs
+    6097 src/locale_catalog.rs
+    6015 src/modules/draw/modify/trim.rs
+    5824 src/snap.rs
+    5760 src/scene/dwg_native_constraints.rs
+    5575 src/app/mod.rs
+    5513 src/scene/view/render.rs
+    5461 src/app/update/command.rs
+    5060 src/app/properties.rs
+    5033 src/mcp.rs
+    5026 src/ui/overlay.rs
+    5019 src/scene/parametric_solve.rs
+    4683 src/app/commands/styleprops.rs
+
+=== GPU Backend Information ===
+src/cli.rs:63:    #[arg(long, visible_alias = "no-gpu")]
+src/cli.rs:123:    pub gpu_probe: Option<String>,
+src/cli.rs:151:    pub gpu_fallback_notice: Option<String>,
+src/cli.rs:154:    pub gpu_compat_auto: bool,
+src/gpu_backend.rs:7://!   - DX12 path: iced's wgpu `StagingBelt` hits an invalid staging buffer
+src/gpu_backend.rs:18://!     vulkan, gl) is exercised in a short-lived `--gpu-probe <backend>`
+src/gpu_backend.rs:26://!   - if no hardware backend passes, one software-adapter probe (`--gpu-probe
+src/gpu_backend.rs:39:/// Hidden child-process flag: `--gpu-probe <dx12|vulkan|gl|sw>`.
+src/gpu_backend.rs:40:pub const PROBE_ARG: &str = "--gpu-probe";
+src/gpu_backend.rs:75:pub fn gpu_guard_active() -> bool {
+src/gpu_backend.rs:234:/// The backend decision for this run (default-empty before `resolve_gpu`).
+src/gpu_backend.rs:235:pub fn active_gpu() -> ActiveGpu {
+src/gpu_backend.rs:240:pub fn active_gpu_summary() -> String {
+src/gpu_backend.rs:241:    let a = active_gpu();
+src/gpu_backend.rs:487:        return Some(PathBuf::from(dir).join("gpu_crash_sentinel"));
+src/gpu_backend.rs:489:    crate::config::config_dir().map(|d| d.join("gpu_crash_sentinel"))
+src/gpu_backend.rs:620:/// Spawn one `--gpu-probe <arg>` child and return its reported capabilities
+src/gpu_backend.rs:653:                    eprintln!("[gpu] {arg} probe timed out; trying the next backend");
+src/gpu_backend.rs:669:pub fn resolve_gpu(cli_backend: Option<&str>, safe_mode: bool) -> GpuResolution {
+src/gpu_backend.rs:700:    if cli_backend.is_some() || env_backend.is_some() || safe_mode || !gpu_guard_active() {
+src/gpu_backend.rs:709:            gpu_guard_active(),
+src/gpu_backend.rs:736:            "[gpu] probe {backend}: {}",
+src/gpu_backend.rs:760:            "[gpu] older GPU detected; probe gl: {}",
+src/gpu_backend.rs:787:            eprintln!("[gpu] backend: {v} ({adapter})");
+src/gpu_backend.rs:790:            eprintln!("[gpu] {}", fallback_notice(reason));
+src/gpu_backend.rs:793:            eprintln!("[gpu] {}", compat_notice());
+src/gpu_backend.rs:828:/// Child-process entry point for `--gpu-probe <backend|sw>`: exercise one
+src/gpu_backend.rs:844:            eprintln!("[gpu-probe] unknown backend '{which}' (want dx12|vulkan|gl|sw)");
+src/gpu_backend.rs:851:fn wgpu_backends_for(name: &str) -> iced::wgpu::Backends {
+src/gpu_backend.rs:852:    use iced::wgpu::Backends;
+
+=== Quadtree Usage ===
+src/app/automation.rs:384:        // elsewhere (quadtree, hit-testing) are untouched.
+src/app/commands/view.rs:1231:                // 6. Invalidate ONLY draw-depth cache without dropping whole-drawing tessellations or spatial indexes.
+src/scene/mod.rs:5://   pick    — hit-testing, selection, grips, spatial index, xclip
+src/scene/mod.rs:524:    pub tree: pick::quadtree::QuadTree,
+src/scene/mod.rs:1228:    /// Model wire set and its spatial interaction index, prepared on the loader
+src/scene/mod.rs:1529:/// Prepare the expensive first Model wire set and spatial interaction index on
+src/scene/mod.rs:2454:    /// Insert/Viewport/Block/BlockEnd handles omitted by the spatial index.
+src/scene/mod.rs:11770:        // Phase 2.1 — quadtree-driven candidate selection. When a view
+src/scene/mod.rs:11777:            visible_path = "quadtree";
+src/scene/mod.rs:12937:        // the changed handles into the existing quadtree (which supports
+src/scene/mod.rs:13030:        let mut tree = pick::quadtree::QuadTree::new(root);
+src/scene/mod.rs:14177:        // quadtree + always-surfaced unbounded).
+src/scene/model/pdf_vector.rs:690:// ponytail: a flat cap; a spatial index over the page segments if large
+src/scene/model/pdf_vector.rs:765:// ponytail: flat cap; a spatial index over page segments for huge drawings.
+src/scene/pick/quadtree.rs:9://   - `QuadTree::new(world_bounds)` — build an empty tree spanning a
+src/scene/pick/quadtree.rs:56:pub struct QuadTree {
+src/scene/pick/quadtree.rs:67:impl QuadTree {
+src/scene/pick/quadtree.rs:83:    // quadtree API and exercised by the unit tests, but production
+src/scene/pick/quadtree.rs:288:        let t = QuadTree::new([0.0, 0.0, 100.0, 100.0]);
+src/scene/pick/quadtree.rs:295:        let mut t = QuadTree::new([0.0, 0.0, 100.0, 100.0]);

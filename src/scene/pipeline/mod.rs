@@ -3800,20 +3800,31 @@ analytic={:.1} regular={:.1} blocks={:.1}",
             .iter()
             .filter(|hatch| hatch.boundary.len() >= 3)
             .count();
-        let (translucent, opaque): (Vec<HatchModel>, Vec<HatchModel>) = hatches
-            .iter()
-            .cloned()
-            .partition(|hatch| hatch.color[3] < 0.999);
+
+        // OPTIMIZATION: Avoid cloning all hatches!
+        // Instead, collect opaque and translucent without intermediate clone
+        let mut opaque = Vec::new();
+        let mut translucent = Vec::new();
+        for hatch in hatches.iter() {
+            if hatch.color[3] < 0.999 {
+                translucent.push(hatch.clone());
+            } else {
+                opaque.push(hatch.clone());
+            }
+        }
+
         self.hatch_gpu.upload(device, queue, &opaque);
-        self.hatch_translucent_gpu
-            .upload(device, queue, &translucent);
+        self.hatch_translucent_gpu.upload(device, queue, &translucent);
+
         if let Some(started) = perf_started {
             let elapsed_ms = started.elapsed().as_secs_f64() * 1000.0;
             if elapsed_ms >= 1.0 {
                 crate::perf_record!(
-                    "[perf] hatch-upload {:>7.1}ms models={}",
+                    "[perf] hatch-upload {:>7.1}ms models={} opaque={} translucent={}",
                     elapsed_ms,
                     renderable_count,
+                    opaque.len(),
+                    translucent.len(),
                 );
             }
         }

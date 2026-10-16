@@ -1,6 +1,8 @@
 mod alias;
 mod automation;
 pub(crate) mod control;
+pub mod phase2_loader_integration;
+pub mod phase2_integration_bridge;
 pub(crate) fn automation_action_names() -> &'static [&'static str] {
     control::action_names()
 }
@@ -1697,6 +1699,14 @@ pub(super) struct OpenCADStudio {
     // Tolerances (extra)
     ds_dimtolj: String,
     ds_dimtzin: String,
+
+    // Phase 2: Background file loading system
+    #[cfg(not(target_arch = "wasm32"))]
+    phase2: crate::app::phase2_integration_bridge::Phase2IntegrationBridge,
+
+    // Viewport optimization: Culling, caching, deferred picking
+    #[cfg(not(target_arch = "wasm32"))]
+    viewport_opt: crate::scene::viewport_optimization::ViewportOptimization,
 }
 
 /// What triggered the "unsaved changes" dialog.
@@ -5166,6 +5176,12 @@ impl OpenCADStudio {
             ds_dimalttz: "0".to_string(),
             ds_dimtolj: "1".to_string(),
             ds_dimtzin: "0".to_string(),
+            // Phase 2: Background file loading system
+            #[cfg(not(target_arch = "wasm32"))]
+            phase2: crate::app::phase2_integration_bridge::Phase2IntegrationBridge::new(),
+            // Viewport optimization: Culling, caching, deferred picking
+            #[cfg(not(target_arch = "wasm32"))]
+            viewport_opt: crate::scene::viewport_optimization::ViewportOptimization::new(),
         };
         // Restore the consolidated user config (settings.json) into live state
         // so preferences, recents, status-bar layout, ribbon density and print

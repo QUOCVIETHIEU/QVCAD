@@ -16,6 +16,7 @@ dependencies = [
  "clap",
  "console_error_panic_hook",
  "cosmic-text 0.15.0",
+ "crossbeam-channel",
  "dwg-thumbnailer",
  "env_logger",
  "flate2",
@@ -1292,6 +1293,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9481c1c90cbf2ac953f07c8d4a58aa3945c425b7185c9154d67a65e4230da511"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "crossbeam-channel"
+version = "0.5.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "98b0cc327b5bc766e7fda9c9260cc0fa81b43a8e240440422dff70788e3f9ef1"
+dependencies = [
+ "crossbeam-utils",
 ]
 
 [[package]]

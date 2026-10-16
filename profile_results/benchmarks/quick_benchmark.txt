@@ -1,0 +1,52 @@
+    Finished `bench` profile [optimized] target(s) in 2.40s
+     Running benches/performance_benchmarks.rs (target/release/deps/performance_benchmarks-0187da648c6fb1dd)
+
+Initializing OpenCADStudio Performance Benchmarks...
+Mode: QUICK (reduced iteration/entity counts for fast validation)
+
+========================================================================================================================
+                                      OPENCADSTUDIO PERFORMANCE BENCHMARK REPORT                                        
+========================================================================================================================
+Benchmark Name                         |   Median |     Mean |      P95 |      Min |       Throughput |   Baseline | Status
+------------------------------------------------------------------------------------------------------------------------
+scene_entity_ingestion_10k             |   1.94 ms |   2.27 ms |   3.00 ms |   1.88 ms | 1.06M entities/s |          - |  PASS 
+analytical_curved_tessellation         |  17.19 ms |  17.10 ms |  18.93 ms |  15.19 ms | 162.9k entities/s |          - |  PASS 
+wire_partitioning_per_frame            |   0.06 ms |   0.06 ms |   0.11 ms |   0.06 ms |                - |          - |  PASS 
+analytical_curved_zoom_100x            |   0.02 ms |   0.02 ms |   0.02 ms |   0.01 ms |       11.71M FPS |          - |  PASS 
+spatial_interaction_index_build        |   2.55 ms |   3.20 ms |   5.83 ms |   1.72 ms |    1.16M wires/s |          - |  PASS 
+hit_test_click_pick_latency            |  31.10 µs |  30.71 µs |  31.54 µs |  29.26 µs |  31.7k queries/s |          - |  PASS 
+hit_test_box_window_enclosed           |  51.39 µs |  53.55 µs |  78.50 µs |  34.02 µs |  19.5k queries/s |          - |  PASS 
+hit_test_box_crossing_boundary         |  16.59 µs |  21.92 µs |  47.93 µs |  13.39 µs |  20.9k queries/s |          - |  PASS 
+osnap_cursor_tracking_latency          |   6.69 µs |   6.77 µs |   7.16 µs |   6.54 µs |   149.4k snaps/s |          - |  PASS 
+constraint_solver_dogleg_system        |   0.16 ms |   0.30 ms |   0.91 ms |   0.08 ms |    5.0k solves/s |          - |  PASS 
+dxf_export_write_throughput            |   1.08 ms |   1.88 ms |   3.46 ms |   1.08 ms |       153.9 MB/s |          - |  PASS 
+dxf_import_parse_throughput            |   2.27 ms |   2.73 ms |   3.67 ms |   2.24 ms |        73.5 MB/s |          - |  PASS 
+selection_state_deep_clone             |  30.50 ns |  30.84 ns |  32.75 ns |  29.21 ns |  34.24M clones/s |          - |  PASS 
+selection_state_arc_clone              |   4.08 ns |   4.10 ns |   4.17 ns |   4.04 ns | 244.92M clones/s |          - |  PASS 
+ui_ribbon_view_construction            | 465.95 µs | 405.57 µs | 513.05 µs | 192.10 µs |     5.2k views/s |          - |  PASS 
+ui_grid_geometry_uncached              |  52.55 µs |  50.40 µs |  52.90 µs |  41.55 µs |   19.1k frames/s |          - |  PASS 
+ui_grid_cache_hit_evaluation           |  40.46 ns |  45.07 ns |  63.92 ns |  40.04 ns |   15.65M evals/s |          - |  PASS 
+ui_icon_handle_cached                  |   4.53 ns |   4.52 ns |   4.58 ns |   4.48 ns | 220.99M lookups/s |          - |  PASS 
+ui_icon_handle_uncached                |  22.29 ns |  33.21 ns |  77.29 ns |  21.88 ns |  44.86M parses/s |          - |  PASS 
+ui_plotstyle_layer_usage               |  21.25 µs |  26.04 µs |  47.20 µs |  19.25 µs | 47.1k rebuilds/s |          - |  PASS 
+ui_statusbar_derived_data              |   0.05 µs |   0.05 µs |   0.05 µs |   0.05 µs |    20.00M hits/s |          - |  PASS 
+ui_grip_budget                         | 138.50 µs | 149.33 µs | 232.45 µs |  92.80 µs |   29.57M grips/s |          - |  PASS 
+ui_grip_budget_build                   | 182.25 µs | 262.02 µs | 433.15 µs | 132.70 µs |   46.17M grips/s |          - |  PASS 
+ui_constraint_glyphs                   |   0.02 µs |   0.02 µs |   0.02 µs |   0.02 µs | 1200.00M glyphs/s |          - |  PASS 
+ui_selection_overlay                   |   0.25 µs |   0.25 µs |   0.25 µs |   0.25 µs | 4.00M overlays/s |          - |  PASS 
+wide_and_tapered_arc_tessellation      |   5.88 ms |  12.17 ms |  25.95 ms |   4.67 ms | 57.8k entities/s |          - |  PASS 
+zoom_extents_bounding_box_calc         | 2027.00 µs | 3812.40 µs | 11189.00 µs | 1345.00 µs | 1.97M entities/s |          - |  PASS 
+batch_entity_transform_mutation        |   6.28 ms |   6.18 ms |  11.52 ms |   3.14 ms | 30.4k entities/s |          - |  PASS 
+draworder_depth_map_full_build         |   0.14 ms |   0.15 ms |   0.22 ms |   0.13 ms | 15.04M entities/s |          - |  PASS 
+draworder_depth_map_incremental_patch  |   0.97 µs |   1.03 µs |   1.26 µs |   0.96 µs |  1.03M patches/s |          - |  PASS 
+undo_delta_recording_cycle             |  25.00 µs |  47.00 µs | 136.00 µs |  24.00 µs |  4.17M records/s |          - |  PASS 
+view_render_viewport_uncached (Before) |  11.00 µs | 454.40 µs | 4439.00 µs |  10.00 µs |        90.9k FPS |          - |  PASS 
+view_render_viewport_cached (After)    |  10.00 µs |  10.00 µs |  10.00 µs |  10.00 µs |       100.0k FPS |          - |  PASS 
+nav_camera_pan_viewport_update         |   1.66 µs |   1.31 µs |   1.76 µs |   0.71 µs |    580.7k pans/s |          - |  PASS 
+nav_spatial_hover_candidate_search     |   7.58 µs |   7.69 µs |   9.26 µs |   5.80 µs | 172.5k queries/s |          - |  PASS 
+nav_viewport_assembly_scaling          |   0.70 µs |   0.74 µs |   0.93 µs |   0.69 µs |   1.44M frames/s |          - |  PASS 
+nav_spatial_quadtree_build             |   0.09 ms |   0.10 ms |   0.13 ms |   0.09 ms |   22.05M items/s |          - |  PASS 
+========================================================================================================================
+
+Saved complete performance metrics JSON to: target/cad_performance_metrics.json
+

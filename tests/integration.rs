@@ -77,3 +77,9 @@ mod zoom_extents_coverage;
 
 #[path = "zoom_extents_xline.rs"]
 mod zoom_extents_xline;
+
+#[path = "phase2_dwg_loading.rs"]
+mod phase2_dwg_loading;
+
+#[path = "dwg_load_workflow.rs"]
+mod dwg_load_workflow;

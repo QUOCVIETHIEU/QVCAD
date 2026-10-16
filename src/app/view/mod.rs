@@ -2511,6 +2511,55 @@ bg={bg_ms:.1}ms n={view_count}"
             }
         }
 
+        // Phase 2: Progress modal overlay
+        #[cfg(not(target_arch = "wasm32"))]
+        let base = if self.phase2.modal_visible() {
+            use iced::widget::{column, container, text, button};
+            let progress_modal = container(
+                column![
+                    text("Loading File").size(24),
+                    text(format!(
+                        "Phase: {}",
+                        self.phase2
+                            .current_phase()
+                            .map(|p| p.label())
+                            .unwrap_or("...")
+                    ))
+                    .size(14),
+                    text(self.phase2.progress_text()).size(12),
+                    text(self.phase2.eta_text()).size(12),
+                    button("Cancel").on_press(Message::OpenCancel),
+                ]
+                .spacing(12)
+                .padding(20)
+            )
+            .padding(40)
+            .width(iced::Length::Fill)
+            .height(iced::Length::Fill)
+            .center_x(iced::Length::Fill)
+            .center_y(iced::Length::Fill)
+            .style(|_theme: &Theme| {
+                use iced::widget::container;
+                container::Style {
+                    background: Some(
+                        iced::Background::Color(
+                            iced::Color {
+                                r: 0.0,
+                                g: 0.0,
+                                b: 0.0,
+                                a: 0.7,
+                            }
+                        )
+                    ),
+                    ..Default::default()
+                }
+            });
+
+            iced::widget::stack![base, progress_modal].into()
+        } else {
+            base
+        };
+
         if let Some(picker) = self.color_picker.as_ref() {
             // While the eyedropper is picking, the panel steps aside so the
             // whole window can be sampled.

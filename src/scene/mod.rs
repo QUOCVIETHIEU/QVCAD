@@ -14,15 +14,20 @@ pub mod cache;
 pub mod compare;
 pub mod convert;
 pub mod creation_style;
+pub mod entity_cache;
 pub(crate) mod frame;
 pub mod model;
 pub mod pick;
+pub mod picking_optimization;
 pub mod pipeline;
 pub(crate) mod render_graph;
+pub mod progressive_tessellation;
 pub mod section_cull;
+pub mod streaming;
 pub mod sub_select;
 pub mod text;
 pub mod view;
+pub mod viewport_optimization;
 
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
 pub enum BlockScalePolicy {

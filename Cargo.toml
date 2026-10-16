@@ -25,6 +25,7 @@ jsonschema = { version = "0.49", default-features = false }
 serde = { version = "1", features = ["derive"] }
 calamine = "0.36.1"
 base64 = "0.22"
+crossbeam-channel = "0.5"
 semver = "1"
 url = "2"
 iced = { git = "https://github.com/iced-rs/iced.git", rev = "23604ff22ab0aad9e00b9327cb7b8546ed84db39", features = ["image", "svg", "advanced", "canvas", "smol", "markdown"] }

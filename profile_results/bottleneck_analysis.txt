@@ -1,0 +1,32 @@
+=== Critical Bottlenecks ===
+1. Scene entity ingestion:
+    // still trigger an epoch-based full rebuild rather than mutating
+    // the index in place). The `#[allow(dead_code)]` is intentional —
+    // dropping them would shrink the public surface only to put it
+    // back once incremental updates ship.
+    #[allow(dead_code)]
+    pub fn len(&self) -> usize {
+
+2. Tessellation:
+src/ui/style/dimstyle.rs:4:use crate::scene::convert::tessellate::{arrow_from_block_name, ArrowKind};
+src/ui/style/dimstyle.rs:1466:    use crate::scene::convert::tessellate::ArrowKind;
+src/ui/style/textstyle.rs:125:                let (mut glyph, _) = crate::scene::text::lff::tessellate_text_ex(
+src/ui/style/textstyle.rs:138:            crate::scene::text::lff::tessellate_text_ex(
+src/ui/window/options.rs:1655:                    // Retessellate once when dragging ends.
+src/app/mtext_editor.rs:5:// the real entity is re-tessellated into the scene's preview wires on every
+src/app/mtext_editor.rs:635:use crate::scene::convert::tessellate;
+src/app/mtext_editor.rs:815:    /// Re-tessellate the current editor text into the editor's OWN preview
+src/app/mtext_editor.rs:847:        let wires: Vec<WireModel> = tessellate::tessellate(
+src/app/update/command.rs:1472:                // assembly, not any entity's tessellated geometry.
+
+3. LOD culling:
+src/ui/menu_bar.rs:172:            ("Explode", "EXPLODE"),
+src/ui/ribbon/keytips.rs:284:    ("draw", "EXPLODE", "EX"),
+src/ui/window/drafting_settings.rs:514:                text("OSNAP capture radius (pixels)").size(11),
+src/ui/window/gradient_editor.rs:170:    let mut pixels = Vec::with_capacity((width * height * 4) as usize);
+src/app/alias/pgp.rs:79:        "DESCOMP" => "EXPLODE",
+src/app/update/command.rs:2253:    /// file's true pixel size, then commit the entity — but placed directly
+src/app/update/viewport.rs:6118:            // Bump so the GPU re-uploads the viewport's re-culled wire set —
+src/app/update/viewport.rs:6168:            // Bump so the GPU re-uploads the viewport's re-culled wire
+src/app/update/file.rs:2742:        // STL gets the highest-resolution LOD (slot 0) so the
+src/app/update/file.rs:2744:        // mesh LOD ladder used for rendering.

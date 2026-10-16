@@ -1069,6 +1069,41 @@ impl OpenCADStudio {
             self.command_line.push_error(&msg);
         }
 
+        // Phase 2: Poll for background loading progress
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            if self.phase2.is_loading() {
+                let complete = self.phase2.poll_events();
+                if complete {
+                    self.command_line
+                        .push_info(crate::tf!("File loaded!").as_ref());
+
+                    // Add loaded document to scene
+                    if let Some(doc) = self.phase2.take_loaded_document() {
+                        let i = self.active_tab;
+                        let entity_count = doc.entities().count();
+
+                        eprintln!("DEBUG: Phase2 complete - setting document with {} entities", entity_count);
+
+                        // Setup scene same way as on_file_opened() in file.rs
+                        self.tabs[i].scene.document = doc;
+                        self.tabs[i].scene.bump_layout_epoch();
+                        self.tabs[i].scene.bump_scale_epoch();
+                        self.tabs[i].scene.bump_ucs_epoch();
+                        self.tabs[i].dirty = true;
+
+                        // Force viewport refresh
+                        self.tabs[i].scene.update(t - self.start);
+
+                        eprintln!("DEBUG: Scene setup complete - viewport should now display entities");
+                    }
+                }
+            }
+
+            // Viewport optimization: Update frame counter for stats
+            self.viewport_opt.next_frame();
+        }
+
         Task::none()
     }
 
