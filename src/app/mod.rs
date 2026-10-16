@@ -1,5 +1,6 @@
 mod alias;
 mod automation;
+mod fast_selection;
 pub(crate) mod control;
 pub mod phase2_loader_integration;
 pub mod phase2_integration_bridge;
