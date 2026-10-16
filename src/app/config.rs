@@ -386,7 +386,7 @@ impl Default for ModelSpaceThemeConfig {
             selection_window_color: 0,
             selection_crossing_color: 0,
             selection_highlight_color: 0,
-            selection_effect: true,
+            selection_effect: false,  // PERF: Disabled to test if highlight is the bottleneck
             selection_preview: 3,
             grip_size: 5,
             grip_color: 0,
