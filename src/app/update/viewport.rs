@@ -653,8 +653,6 @@ impl OpenCADStudio {
         p: iced::Point,
         crossing: bool,
     ) -> (Vec<Handle>, BoxSelectTiming) {
-        use std::io::Write;
-        let _ = std::fs::File::create("/tmp/box_selection_called.txt");  // Proof the function is called
         let (view_rot, eye, all_wires) = self.pick_view(i, edit_cam, bounds);
         let world_aabb = [a, iced::Point::new(a.x, p.y), p, iced::Point::new(p.x, a.y)]
             .map(|point| self.cursor_model_point(i, edit_cam, point, bounds))
@@ -680,7 +678,6 @@ impl OpenCADStudio {
             start.map_or(0.0, |start| start.elapsed().as_secs_f64() * 1000.0)
         };
         let mut timing = BoxSelectTiming::default();
-        let t_start = Instant::now();
         let t_sel = crate::perf::enabled().then(Instant::now);
         let area_candidates = self.tabs[i].scene.interaction_candidates_in_aabb(
             all_wires,
@@ -690,7 +687,6 @@ impl OpenCADStudio {
             eye,
             bounds,
         );
-        let t_candidates = t_start.elapsed().as_secs_f64() * 1000.0;
         timing.candidates = elapsed(t_sel);
         let t_hit = crate::perf::enabled().then(Instant::now);
         let scene = &self.tabs[i].scene;
@@ -701,17 +697,14 @@ impl OpenCADStudio {
                 .into_iter()
                 .filter_map(|s| Scene::handle_from_wire_name(s))
                 .collect();
-        let t_wires = t_start.elapsed().as_secs_f64() * 1000.0;
         timing.wires = elapsed(t_hit);
         // PERFORMANCE: Use fast AABB selection for immediate results (50ms vs 1170ms)
-        // This shows results instantly instead of freezing for 2+ seconds
-        let t_hatch_start = Instant::now();
+        // Expanded 50px radius catches hatches at selection boundaries
         let fast_hatch_handles = fast_selection::fast_box_select_hatches(
             a,
             p,
             &scene.visible_hatches_for_click(candidate_handles.as_ref()),
         );
-        let t_hatch_fast = t_hatch_start.elapsed().as_secs_f64() * 1000.0;
         handles.extend(fast_hatch_handles);
         // PERFORMANCE: Fast selection for insert hatches too
         let fast_insert_handles = fast_selection::fast_box_select_insert_hatches(
@@ -720,19 +713,7 @@ impl OpenCADStudio {
             scene.insert_hatches_for_click().as_ref(),
         );
         handles.extend(fast_insert_handles);
-        let t_hatches = t_start.elapsed().as_secs_f64() * 1000.0;
         timing.hatch = elapsed(t_hit);
-
-        // Log timing to file for debugging
-        if let Ok(mut file) = std::fs::OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open("/tmp/selection_timing.log")
-        {
-            let _ = writeln!(file, "candidates={:.1}ms, wires={:.1}ms, hatch_fast={:.1}ms, total_hatches={:.1}ms",
-                t_candidates, t_wires - t_candidates, t_hatch_fast, t_hatches - t_wires);
-        }
-        let t_mesh_start = Instant::now();
         handles.extend(scene.mesh_box_hit(
             a,
             p,
@@ -742,9 +723,6 @@ impl OpenCADStudio {
             bounds,
             candidate_handles.as_ref(),
         ));
-        let t_mesh1 = t_mesh_start.elapsed().as_secs_f64() * 1000.0;
-
-        let t_block_start = Instant::now();
         handles.extend(scene.block_mesh_box_hit(
             a,
             p,
@@ -754,25 +732,9 @@ impl OpenCADStudio {
             bounds,
             candidate_handles.as_ref(),
         ));
-        let t_block = t_block_start.elapsed().as_secs_f64() * 1000.0;
-
-        let t_retain_start = Instant::now();
         // Reference-only entities (API v9) are plugin-owned display geometry:
         // a box/window selection must not pick them.
         handles.retain(|h| !scene.is_reference_only(*h));
-        let t_retain = t_retain_start.elapsed().as_secs_f64() * 1000.0;
-        let t_total = t_start.elapsed().as_secs_f64() * 1000.0;
-
-        // Log mesh timing
-        if let Ok(mut file) = std::fs::OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open("/tmp/selection_timing.log")
-        {
-            let _ = writeln!(file, "mesh_box_hit={:.1}ms, block_mesh={:.1}ms, retain={:.1}ms, TOTAL={:.1}ms",
-                t_mesh1, t_block, t_retain, t_total);
-        }
-
         timing.hit = elapsed(t_hit);
         (handles, timing)
     }
