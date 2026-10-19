@@ -3473,7 +3473,7 @@ fn start_page_content<'a>(
     let content = column![
         Space::new().height(iced::Length::Fixed(28.0)),
         // Company name - Top (white text, bold)
-        container(text("QUOC VIET TRADING AND ENGINEERING").size(16).font(iced::Font {
+        container(text("QUOC VIET CO.,LTD").size(16).font(iced::Font {
             family: iced::font::Family::SansSerif,
             weight: iced::font::Weight::Bold,
             ..iced::Font::default()
@@ -3484,6 +3484,21 @@ fn start_page_content<'a>(
         container(
             button(text("https://quocviet.com.vn").size(14))
                 .on_press(Message::OpenUrl("https://quocviet.com.vn".to_string()))
+                .style(|_theme: &Theme, _| {
+                    button::Style {
+                        background: None,
+                        text_color: iced::Color::WHITE,
+                        border: Border::default(),
+                        ..Default::default()
+                    }
+                })
+                .padding(0)
+        )
+        .center_x(Fill),
+        // GitHub link
+        container(
+            button(text("https://github.com/QUOCVIETHIEU/QVCAD").size(12))
+                .on_press(Message::OpenUrl("https://github.com/QUOCVIETHIEU/QVCAD.git".to_string()))
                 .style(|_theme: &Theme, _| {
                     button::Style {
                         background: None,
