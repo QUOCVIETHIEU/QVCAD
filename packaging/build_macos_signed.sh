@@ -136,7 +136,7 @@ cp -R "$APP" "$STAGING/"
 ln -s /Applications "$STAGING/Applications"
 
 for i in 1 2 3 4 5; do
-    if hdiutil create -volname "Open CAD Studio" -srcfolder "$STAGING" -ov -format UDZO "$DMG"; then
+    if hdiutil create -volname "QVCAD" -srcfolder "$STAGING" -ov -format UDZO "$DMG"; then
         break
     fi
     rm -f "$DMG"
