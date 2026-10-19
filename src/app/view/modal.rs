@@ -1,6 +1,6 @@
 use super::super::{Message, OpenCADStudio};
 use crate::t;
-use iced::widget::{button, column, container, row, text, Space};
+use iced::widget::{button, column, container, row, text, Space, text_input};
 use iced::{Background, Element, Fill, Fit, Theme};
 use std::borrow::Cow;
 
@@ -99,6 +99,7 @@ impl OpenCADStudio {
                 .as_ref()
                 .map(|d| d.title())
                 .unwrap_or_default(),
+            Some(K::MCPConfig) => "MCP Configuration".to_string(),
             None => String::new(),
         }
     }
@@ -486,6 +487,120 @@ impl OpenCADStudio {
                 let body = self.update_notice_body.as_deref().unwrap_or("");
                 sized_flow(ex, 560, 460, |flow| {
                     crate::ui::window::update_notice::view_window(latest, body, flow)
+                })
+            }
+            super::super::ModalKind::MCPConfig => {
+                sized_flow(ex, 950, 800, |flow| {
+                    let content = column![
+                        text("OpenCAD Studio MCP Configuration").size(18),
+                        Space::new().height(iced::Length::Fixed(10.0)),
+                        text("STEP 1: Find OpenCADStudio Path on Your Computer").size(12).font(iced::Font {
+                            family: iced::font::Family::SansSerif,
+                            weight: iced::font::Weight::Bold,
+                            ..iced::Font::default()
+                        }),
+                        text("Mac:").size(11).font(iced::Font {
+                            family: iced::font::Family::SansSerif,
+                            weight: iced::font::Weight::Bold,
+                            ..iced::Font::default()
+                        }),
+                        text("- Open Terminal and type: which OpenCADStudio").size(10),
+                        text("- Or right-click OpenCADStudio.app → Get Info → Full path").size(10),
+                        text("Windows:").size(11).font(iced::Font {
+                            family: iced::font::Family::SansSerif,
+                            weight: iced::font::Weight::Bold,
+                            ..iced::Font::default()
+                        }),
+                        text("- Open Command Prompt: where OpenCADStudio.exe").size(10),
+                        text("- Or check: C:\\Program Files\\OpenCADStudio\\OpenCADStudio.exe").size(10),
+                        Space::new().height(iced::Length::Fixed(15.0)),
+                        text("STEP 2: Claude Desktop / Claude.ai").size(12).font(iced::Font {
+                            family: iced::font::Family::SansSerif,
+                            weight: iced::font::Weight::Bold,
+                            ..iced::Font::default()
+                        }),
+                        text("Edit ~/.claude/config.json - Replace /path/to with your actual path:").size(10),
+                        text_input(
+                            "claude_config",
+                            "{\n  \"mcpServers\": {\n    \"opencadstudio\": {\n      \"command\": \"/path/to/OpenCADStudio\",\n      \"args\": [\"--mcp\"],\n      \"enabled\": true\n    }\n  }\n}"
+                        )
+                        .size(9)
+                        .font(iced::Font::MONOSPACE),
+                        Space::new().height(iced::Length::Fixed(15.0)),
+                        text("STEP 3: OpenAI (ChatGPT)").size(12).font(iced::Font {
+                            family: iced::font::Family::SansSerif,
+                            weight: iced::font::Weight::Bold,
+                            ..iced::Font::default()
+                        }),
+                        text("Go to Settings → Developer Settings → MCP. Fill in the form:").size(10),
+                        text_input(
+                            "openai_name",
+                            "Name: OpenCADStudio-MCP"
+                        )
+                        .size(9)
+                        .font(iced::Font::MONOSPACE),
+                        text_input(
+                            "openai_type",
+                            "Type: STDIO"
+                        )
+                        .size(9)
+                        .font(iced::Font::MONOSPACE),
+                        text_input(
+                            "openai_command",
+                            "Command to launch: /{location where your application has been installed}/OpenCADStudio"
+                        )
+                        .size(9)
+                        .font(iced::Font::MONOSPACE),
+                        text_input(
+                            "openai_args",
+                            "Arguments: --mcp"
+                        )
+                        .size(9)
+                        .font(iced::Font::MONOSPACE),
+                        text_input(
+                            "openai_env",
+                            "Environment variables: default"
+                        )
+                        .size(9)
+                        .font(iced::Font::MONOSPACE),
+                        text_input(
+                            "openai_pass",
+                            "Environment variable passthrough: default"
+                        )
+                        .size(9)
+                        .font(iced::Font::MONOSPACE),
+                        text_input(
+                            "openai_dir",
+                            "Working directory: default"
+                        )
+                        .size(9)
+                        .font(iced::Font::MONOSPACE),
+                        Space::new().height(iced::Length::Fixed(15.0)),
+                        text("STEP 4: Google Gemini").size(12).font(iced::Font {
+                            family: iced::font::Family::SansSerif,
+                            weight: iced::font::Weight::Bold,
+                            ..iced::Font::default()
+                        }),
+                        text("Go to aistudio.google.com → Settings → Extensions → MCP. Add:").size(10),
+                        text_input(
+                            "gemini_config",
+                            "[opencadstudio]\ncommand = \"/path/to/OpenCADStudio\"\nargs = [\"--mcp\"]\nenabled = true"
+                        )
+                        .size(9)
+                        .font(iced::Font::MONOSPACE),
+                        Space::new().height(iced::Length::Fixed(10.0)),
+                        text("Docs: https://modelcontextprotocol.io").size(9),
+                    ]
+                    .spacing(6)
+                    .padding(14);
+
+                    let scrollable = iced::widget::scrollable(content)
+                        .height(flow.height);
+
+                    container(scrollable)
+                        .width(flow.width)
+                        .height(flow.height)
+                        .into()
                 })
             }
             super::super::ModalKind::LayerTranslator => {

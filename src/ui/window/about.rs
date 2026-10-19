@@ -111,7 +111,7 @@ pub(crate) fn report() -> String {
     let sys = system_info();
     #[allow(unused_mut)]
     let mut out = format!(
-        "Open CAD Studio v{}\nRevision: {}\nCommit date: {}\nProfile: {}\nFeatures: {}\n\n\
+        "QVCAD v{}\nRevision: {}\nCommit date: {}\nProfile: {}\nFeatures: {}\n\n\
          [System]\nOS: {} ({} {})\nCPU: {}\nLogical processors: {}\nRAM: {} total, {} available\n",
         env!("OCS_FULL_VERSION"),
         env!("OCS_GIT_REV"),
@@ -195,7 +195,7 @@ pub fn view_window(sizing: crate::ui::modal::ModalSizing) -> Element<'static, Me
         row![
             logo,
             column![
-                text("Open CAD Studio").size(28).style(primary_style),
+                text("QVCAD").size(28).style(primary_style),
                 text(t!("CAD application for Architecture & Engineering"))
                     .size(11)
                     .style(muted_style),

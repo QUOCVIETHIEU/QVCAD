@@ -2563,7 +2563,7 @@ fn response(id: Value, result: Value) -> Value {
 fn server_info() -> Value {
     json!({
         "name":"OpenCADStudio",
-        "title":"Open CAD Studio",
+        "title":"QVCAD",
         "version":env!("OCS_APP_VERSION"),
     })
 }

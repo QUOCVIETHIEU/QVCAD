@@ -2270,6 +2270,7 @@ pub enum ModalKind {
     /// `RecoveryPrompt` — nothing is wrong with the drawing itself.
     #[cfg(target_arch = "wasm32")]
     AutosaveRestore,
+    MCPConfig,
 }
 
 /// A property group controlled by a layer state's restore mask.
@@ -3907,6 +3908,10 @@ pub enum Message {
     PluginManagerClose,
     /// Enable (`true`) or disable (`false`) the plugin with this id.
     SetPluginEnabled(String, bool),
+    // ── MCP Config window ───────────────────────────────────────────
+    MCPConfigOpen,
+    #[allow(dead_code)]
+    MCPConfigClose,
     // ── Plugin marketplace (install from a linked repo's releases) ─────────
     /// Edit the add-repository text field.
     PluginRepoInput(String),

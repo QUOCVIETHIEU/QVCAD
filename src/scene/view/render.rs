@@ -1071,36 +1071,46 @@ retained_contributors={}",
                         && !Arc::ptr_eq(previous, &vp.annotation_context_wires)
                 });
             if selection_changed || highlighted_geometry_changed || annotation_context_changed {
-                let sel_color = if self.selection_effect {
-                    Some(self.selection_color)
-                } else {
-                    None
-                };
-                inner.upload_selected_wires(
-                    device,
-                    queue,
-                    &vp_wires[..],
-                    &vp.selected_handles,
-                    &vp.hover_handles,
-                    &vp.annotation_context_wires,
-                    &draw_depths,
-                    sel_color,
-                );
-                // Text highlight rides the same selection key: a pick / rollover
-                // recolours the selected / hovered glyphs without touching the
-                // base text buffer.
-                inner.upload_text_highlight(
-                    device,
-                    queue,
-                    &vp_wires[..],
-                    &vp.selected_handles,
-                    &vp.hover_handles,
-                    &vp.annotation_context_wires,
-                    &draw_depths,
-                    sel_color,
-                );
+                let t0 = std::time::Instant::now();
+                // PERF: Skip expensive GPU uploads if selection effect is disabled
+                if self.selection_effect {
+                    let sel_color = Some(self.selection_color);
+                    let t1 = std::time::Instant::now();
+                    inner.upload_selected_wires(
+                        device,
+                        queue,
+                        &vp_wires[..],
+                        &vp.selected_handles,
+                        &vp.hover_handles,
+                        &vp.annotation_context_wires,
+                        &draw_depths,
+                        sel_color,
+                    );
+                    let t2 = std::time::Instant::now();
+                    eprintln!("[PERF] upload_selected_wires: {}ms", (t2 - t1).as_millis());
+
+                    // Text highlight rides the same selection key: a pick / rollover
+                    // recolours the selected / hovered glyphs without touching the
+                    // base text buffer.
+                    let t3 = std::time::Instant::now();
+                    inner.upload_text_highlight(
+                        device,
+                        queue,
+                        &vp_wires[..],
+                        &vp.selected_handles,
+                        &vp.hover_handles,
+                        &vp.annotation_context_wires,
+                        &draw_depths,
+                        sel_color,
+                    );
+                    let t4 = std::time::Instant::now();
+                    eprintln!("[PERF] upload_text_highlight: {}ms", (t4 - t3).as_millis());
+                }
+                let t5 = std::time::Instant::now();
                 inner.cached_annotation_highlight_source =
                     Some(Arc::clone(&vp.annotation_context_wires));
+                let t6 = std::time::Instant::now();
+                eprintln!("[PERF] SELECTION BLOCK TOTAL: {}ms", (t6 - t0).as_millis());
             }
             // Advance the content id even when an unrelated entity patch kept
             // the existing overlay valid, so future deltas compare to the
@@ -1113,14 +1123,24 @@ retained_contributors={}",
                 .as_ref()
                 .map_or(true, |source| !Arc::ptr_eq(source, &vp.meshes))
             {
+                let t_mesh_batch_0 = std::time::Instant::now();
                 let patched = vp.wire_patch.as_ref().is_some_and(|(previous, patch)| {
                     *previous == inner.cached_mesh_content_id
                         && inner.patch_mesh_batch(device, queue, &vp.meshes[..], &patch.changes)
                 });
                 if !patched {
+                    let t_batch = std::time::Instant::now();
                     inner.upload_mesh_batch(device, queue, &vp.meshes[..]);
+                    let t_batch_end = std::time::Instant::now();
+                    eprintln!("[PERF] upload_mesh_batch: {}ms", (t_batch_end - t_batch).as_millis());
+                } else {
+                    let t_patch = std::time::Instant::now();
+                    let t_patch_end = std::time::Instant::now();
+                    eprintln!("[PERF] patch_mesh_batch: {}ms", (t_patch_end - t_patch).as_millis());
                 }
                 inner.cached_mesh_source = Some(Arc::clone(&vp.meshes));
+                let t_mesh_batch_1 = std::time::Instant::now();
+                eprintln!("[PERF] MESH BATCH TOTAL: {}ms", (t_mesh_batch_1 - t_mesh_batch_0).as_millis());
             }
             inner.cached_mesh_content_id = vp.wire_content_id;
             // Selection / hover highlight overlay — tinted copies of just the
@@ -1131,11 +1151,17 @@ retained_contributors={}",
                 vp.selection_generation,
             );
             if hl_key != inner.cached_highlight_key {
-                inner.update_mesh_highlight(
-                    &vp.selected_handles,
-                    &vp.hover_handles,
-                    &vp.annotation_context_wires,
-                );
+                // PERF: Skip expensive mesh highlight update if selection effect is disabled
+                if self.selection_effect {
+                    let t_mesh_0 = std::time::Instant::now();
+                    inner.update_mesh_highlight(
+                        &vp.selected_handles,
+                        &vp.hover_handles,
+                        &vp.annotation_context_wires,
+                    );
+                    let t_mesh_1 = std::time::Instant::now();
+                    eprintln!("[PERF] update_mesh_highlight: {}ms", (t_mesh_1 - t_mesh_0).as_millis());
+                }
                 inner.cached_highlight_key = hl_key;
             }
             // Live overlay (command preview / interim / grip drag) — small and

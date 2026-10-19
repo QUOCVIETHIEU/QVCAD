@@ -10177,6 +10177,14 @@ impl OpenCADStudio {
                 self.persist_settings_if_changed();
                 Task::none()
             }
+            Message::MCPConfigOpen => {
+                self.active_modal = Some(super::ModalKind::MCPConfig);
+                Task::none()
+            }
+            Message::MCPConfigClose => {
+                self.close_active_modal();
+                Task::none()
+            }
             Message::PluginRepoInput(s) => {
                 self.plugin_repo_input = s;
                 Task::none()

@@ -3374,7 +3374,11 @@ fn start_page_content<'a>(
     action_width_out: std::sync::Arc<std::sync::atomic::AtomicU32>,
     active: super::StartSection,
 ) -> Element<'a, Message> {
-    let headline = text("Open CAD Studio").size(40).style(start_primary_style);
+    let headline = text("QVCAD").size(60).font(iced::Font {
+        family: iced::font::Family::SansSerif,
+        weight: iced::font::Weight::Bold,
+        ..iced::Font::default()
+    }).style(start_primary_style);
 
     // Plain outlined button (Open / New / Help / Contribute).
     let outline_btn = |label: String, msg: Message| {
@@ -3421,7 +3425,6 @@ fn start_page_content<'a>(
     let primary_row = WrapFlow::new(vec![
         outline_btn(crate::tr!("start", "new-drawing"), Message::TabNew).into(),
         outline_btn(crate::tr!("start", "open-file"), Message::OpenFile).into(),
-        donate_btn.into(),
     ])
     .spacing_x(12.0)
     .row_h(48.0)
@@ -3429,18 +3432,13 @@ fn start_page_content<'a>(
 
     #[cfg_attr(target_arch = "wasm32", allow(unused_mut))]
     let mut secondary_items: Vec<Element<'a, Message>> = vec![
-        outline_btn(
-            crate::tr!("start", "send-feedback"),
-            Message::RibbonToolClick {
-                tool_id: "REPORT".to_string(),
-                event: crate::modules::ModuleEvent::Command("REPORT".to_string()),
-            },
-        )
-        .into(),
         outline_btn(crate::tr!("action", "options"), Message::OptionsOpen).into(),
     ];
     secondary_items
         .push(outline_btn(crate::tr!("action", "plugins"), Message::PluginManagerOpen).into());
+    secondary_items
+        .push(outline_btn("MCP Config".to_string(), Message::MCPConfigOpen).into());
+
     // The web build is already in the browser, so only the desktop offers a
     // link to the web version.
     #[cfg(not(target_arch = "wasm32"))]
@@ -3472,79 +3470,74 @@ fn start_page_content<'a>(
         .row_h(44.0)
         .report_natural_width(action_width_out.clone());
 
-    let reddit_btn = button(
-        row![
-            iced::widget::svg(iced::widget::svg::Handle::from_memory(include_bytes!(
-                "../../../assets/icons/reddit.svg"
-            )))
-            .width(20)
-            .height(20),
-            text("r/OpenCADStudio").size(14),
-        ]
-        .spacing(7)
-        .align_y(iced::Center),
-    )
-    .on_press(Message::OpenUrl(
-        "https://www.reddit.com/r/OpenCADStudio/".to_string(),
-    ))
-    .padding([10, 22])
-    .style(|theme: &Theme, status| {
-        let palette = theme.palette();
-        let pair = match status {
-            button::Status::Hovered => palette.background.strong,
-            _ => palette.background.weak,
-        };
-        start_action_shape(button::Style {
-            background: Some(Background::Color(pair.color)),
-            text_color: pair.text,
-            border: Border {
-                color: Color::from_rgb8(255, 69, 0),
-                width: 1.0,
-                ..Default::default()
-            },
-            ..Default::default()
-        })
-    });
-
-    let sponsors = column![
-        text(crate::tr!("start", "sponsors")).size(15),
-        mouse_area(
-            container(
-                iced::widget::svg(iced::widget::svg::Handle::from_memory(include_bytes!(
-                    "../../../assets/sponsors/openaec-logo-dark-on-light.svg"
-                )))
-                .width(Fill)
-                .height(iced::Length::Fixed(120.0))
-                .content_fit(iced::ContentFit::Contain),
-            )
-            .width(Fill.max(300.0)),
-        )
-        .interaction(iced::mouse::Interaction::Pointer)
-        .on_press(Message::OpenUrl("https://open-aec.com/".to_string())),
-    ]
-    .spacing(10)
-    .align_x(iced::alignment::Horizontal::Center)
-    .width(Fill);
-
     let content = column![
         Space::new().height(iced::Length::Fixed(28.0)),
+        // Company name - Top (white text, bold)
+        container(text("QUOC VIET TRADING AND ENGINEERING").size(16).font(iced::Font {
+            family: iced::font::Family::SansSerif,
+            weight: iced::font::Weight::Bold,
+            ..iced::Font::default()
+        }))
+            .center_x(Fill),
+        Space::new().height(iced::Length::Fixed(8.0)),
+        // Website - Below company name (white text)
+        container(
+            button(text("https://quocviet.com.vn").size(14))
+                .on_press(Message::OpenUrl("https://quocviet.com.vn".to_string()))
+                .style(|_theme: &Theme, _| {
+                    button::Style {
+                        background: None,
+                        text_color: iced::Color::WHITE,
+                        border: Border::default(),
+                        ..Default::default()
+                    }
+                })
+                .padding(0)
+        )
+        .center_x(Fill),
+        Space::new().height(iced::Length::Fixed(20.0)),
+        // Logo - PNG image
+        container(
+            iced::widget::image(iced::widget::image::Handle::from_path(
+                "/Users/voquochieu/Claude/target-game/OpenCADStudio/assets/logo/quocviet-logo.png"
+            ))
+            .width(iced::Length::Fixed(150.0))
+            .height(iced::Length::Fixed(150.0))
+            .content_fit(iced::ContentFit::Contain),
+        )
+        .center_x(Fill),
+        Space::new().height(iced::Length::Fixed(28.0)),
+        // Headline
         container(headline).center_x(Fill),
         Space::new().height(iced::Length::Fixed(22.0)),
+        // Buttons
         container(primary_row).center_x(Fill),
         Space::new().height(iced::Length::Fixed(10.0)),
         container(secondary_row).center_x(Fill),
-        Space::new().height(iced::Length::Fixed(10.0)),
-        container(reddit_btn).center_x(Fill),
-        Space::new().height(iced::Length::Fixed(20.0)),
-        sponsors,
-        Space::new().height(iced::Length::Fixed(52.0)),
     ]
     .spacing(0)
     .width(Fill)
     .height(Fill);
 
-    // Collapse side panels one at a time as width shrinks: Tutorials first,
-    // then Discussions, Supporters, and Recent Documents last.
+    // Keep Recent panel only, remove all other panels
+    let panel_w = 280.0f32;
+    let recent = recent_files_panel(
+        recents,
+        thumbs,
+        recent_limit,
+        recent_limit_input,
+        recent_view,
+        iced::Length::Fixed(panel_w),
+    );
+    let welcome = container(content).width(Fill).height(Fill);
+
+    // Tutorial-videos rail: the official playlist, fetched at boot (cached on
+    // disk) — thumbnail card + title per video, click opens the browser.
+    const VIDEO_PANEL_PADDING: f32 = 16.0;
+    const VIDEO_SCROLL_GUTTER: f32 = 14.0;
+    let panel_w = 280.0f32;
+
+    // Simplified layout - just show tutorials
     #[derive(Clone, Copy, PartialEq, Eq)]
     enum StartLayout {
         AllPanels,
@@ -3553,59 +3546,8 @@ fn start_page_content<'a>(
         RecentAndWelcome,
         Compact,
     }
-    let panel_w = 280.0f32;
-    const VIDEO_PANEL_PADDING: f32 = 16.0;
-    const VIDEO_SCROLL_GUTTER: f32 = 14.0;
-    let measured_action_w =
-        f32::from_bits(action_width_out.load(std::sync::atomic::Ordering::Relaxed));
-    let welcome_wide_min = measured_action_w.max(360.0);
-    let avail = (avail_w - 16.0).max(0.0); // minus the page's l/r padding
-    let panel_widths = [panel_w; 4];
-    let mut panel_visible = [true, true, true, true];
-    let required_width = |visible: &[bool; 4]| {
-        let visible_panels = visible.iter().filter(|&&shown| shown).count();
-        welcome_wide_min
-            + panel_widths
-                .iter()
-                .zip(visible)
-                .filter_map(|(width, shown)| shown.then_some(*width))
-                .sum::<f32>()
-            + visible_panels as f32 * 16.0
-    };
-    // Re-measure after every collapse. There are no independent breakpoints:
-    // the available width and the panels' preferred widths decide the state.
-    for panel in [1usize, 2, 3, 0] {
-        if required_width(&panel_visible) <= avail {
-            break;
-        }
-        panel_visible[panel] = false;
-    }
-    let start_layout = match panel_visible {
-        [true, true, true, true] => StartLayout::AllPanels,
-        [true, false, true, true] => StartLayout::WithoutVideos,
-        [true, false, false, true] => StartLayout::WithoutVideosAndDiscussions,
-        [true, false, false, false] => StartLayout::RecentAndWelcome,
-        _ => StartLayout::Compact,
-    };
+    let start_layout = StartLayout::AllPanels;
 
-    let recent = recent_files_panel(
-        recents,
-        thumbs,
-        recent_limit,
-        recent_limit_input,
-        recent_view,
-        match start_layout {
-            StartLayout::AllPanels
-            | StartLayout::WithoutVideos
-            | StartLayout::WithoutVideosAndDiscussions
-            | StartLayout::RecentAndWelcome => iced::Length::Fixed(panel_w),
-            StartLayout::Compact => iced::Length::Fill,
-        },
-    );
-    let welcome = container(content).width(Fill).height(Fill);
-
-    // Tutorial-videos rail: the official playlist, fetched at boot (cached on
-    // disk) — thumbnail card + title per video, click opens the browser.
     let videos_panel: Element<'a, Message> = {
         // Derive the 16:9 cover box from the actual shared list width so the
         // whole thumbnail remains visible when that width changes.
@@ -3706,6 +3648,7 @@ fn start_page_content<'a>(
         .into()
     };
 
+    /* REMOVED: Discussions, Supporters panels
     // GitHub Discussions rail. Native builds refresh from GitHub's public feed;
     // web builds read the CI-generated snapshot. Both sources mark pinned
     // discussions and sort them before the rest of the list.
@@ -4007,7 +3950,12 @@ fn start_page_content<'a>(
             .height(Fill)
             .into()
         }
-    };
+    }; */
+
+    // Layout: Recent panel (left) + Welcome content (middle) + Tutorials (right)
+    let body = iced::widget::row![recent, welcome, videos_panel]
+        .spacing(16)
+        .height(Fill);
 
     container(body)
         .style(|theme: &Theme| container::Style {
@@ -4022,6 +3970,8 @@ fn start_page_content<'a>(
         })
         .width(Fill)
         .height(Fill)
+        .center_x(Fill)
+        .center_y(Fill)
         .into()
 }
 
